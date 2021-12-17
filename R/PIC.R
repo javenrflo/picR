@@ -1,14 +1,43 @@
-PIC <- function(object, newdata, group_sizes = NULL){
+#' Compute Predictive Information Criteria (PIC)
+#'
+#' @description PIC is a generic function for computing PIC from the results of various model fitting functions. The function invokes particular \emph{methods} which depend on the class of the first argument.
+#'
+#' @param object a model object to evaluate via predictive information criteria (PIC)
+#' @param ... additional arguments affecting the PIC computed
+#'
+#' @details Currently, only a single method exists for this generic function. This method is for the class "lm" of linear models. Additional methods are in development.
+#'
+#' @return The form of the value returned by PIC depends on the class of its argument and the additional arguments supplied. See the documentation of the particular method(s) for details of what is produced by that method.
+#'
+#' @export
+#'
+PIC <- function(object, ...){
+  UseMethod("PIC", object)
+}
 
-  X.obs <- model.matrix(object)
+
+#' PIC method for Linear Model Fits
+#'
+#' @param object Object of class inheriting from "lm"
+#' @param newdata An optional data frame in which to look for variables with which to compute PIC. If omitted, the fitted values are used.
+#' @param group_sizes A scalar or vector indicating the sizes of data partitions. See details.
+#' @param ... further arguments passed to or from other methods.
+#'
+#' @details PIC.lm computes PIC values based on the supplied model.
+#' @return
+#' @export
+#'
+PIC.lm <- function(object, newdata, group_sizes = NULL, ...){
+
+  X.obs <- stats::model.matrix(object)
 
   if (missing(newdata) || is.null(newdata)) {
     X.pred  <- X.obs
     newdata <- object$model
   } else {
-    tt <- terms(object)
-    Terms <- delete.response(tt)
-    X.pred <- model.matrix(Terms, newdata)
+    tt <- stats::terms(object)
+    Terms <- stats::delete.response(tt)
+    X.pred <- stats::model.matrix(Terms, newdata)
   }
 
   sigma.mle <- sqrt(crossprod(object$residuals)/nrow(X.obs))
@@ -49,5 +78,3 @@ PIC <- function(object, newdata, group_sizes = NULL){
     return(gdat)
   }
 }
-
-inv.mat <- function(x){chol2inv(chol(x))}

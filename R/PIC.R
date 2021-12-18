@@ -1,30 +1,51 @@
-#' Compute Predictive Information Criteria (PIC)
+#' Predictive Information Criteria
 #'
-#' @description PIC is a generic function for computing PIC from the results of various model fitting functions. The function invokes particular \emph{methods} which depend on the class of the first argument.
+#' @description \code{PIC} is a generic function for computing predictive information criteria.
+#' Depending on the fitted model object \code{\link[base]{class}}, the function invokes the appropriate method for
+#' determining PIC value(s) for the supplied model.
 #'
-#' @param object a model object to evaluate via predictive information criteria (PIC)
-#' @param ... additional arguments affecting the PIC computed
+#' @param object A fitted model object on which computed PIC value(s) are partially based.
+#' @param newdata An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.
+#' @param ... Further arguments passed to other methods.
 #'
-#' @details Currently, only a single method exists for this generic function. This method is for the class "lm" of linear models. Additional methods are in development.
+#' @details The PIC are criteria developed for model selection within predictive contexts. Given a
+#' set of predictive models, the model with the minimum criterion value is preferred.
 #'
-#' @return The form of the value returned by PIC depends on the class of its argument and the additional arguments supplied. See the documentation of the particular method(s) for details of what is produced by that method.
+#' The PIC are developed to asymptotically select the candidate model that minimizes the mean
+#' squared error of prediction (MSEP), thus behaving similarly to the the Akaike Information
+#' Criterion (AIC). Contrasting with AIC, however, the PIC do not require the assumption of
+#' validation data that are independent and identically distributed to the set of training data.
+#' The PIC thus offer greater flexibility in predictive model selection applications.
+#'
+#' @return The form of the value returned by \code{PIC} depends on the fitted model class and its method-specific arguments. Details may be found in the documentation of each method.
+#'
+#' @seealso
+#' \code{\link{PIC.lm}}
 #'
 #' @export
 #'
-PIC <- function(object, ...){
+PIC <- function(object, newdata, ...){
   UseMethod("PIC", object)
 }
 
 
-#' PIC method for Linear Model Fits
+#' PIC method for Linear Models
 #'
-#' @param object Object of class inheriting from "lm"
-#' @param newdata An optional data frame in which to look for variables with which to compute PIC. If omitted, the fitted values are used.
-#' @param group_sizes A scalar or vector indicating the sizes of data partitions. See details.
-#' @param ... further arguments passed to or from other methods.
+#' @description Computation of predictive information criteria for linear models.
+#'
+#' @param object A fitted model object of \code{\link[base]{class}} "lm".
+#' @param newdata An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.
+#' @param group_sizes A scalar or numeric vector indicating the sizes of \code{newdata} partitions. See 'Details'.
+#' @param ... Further arguments passed to or from other methods.
 #'
 #' @details PIC.lm computes PIC values based on the supplied model.
-#' @return value
+#'
+#' @return If \code{group_sizes = NULL}, a scalar is returned. Otherwise, \code{newdata} is
+#' returned with an appended column labeled 'PIC' containing group-specific PIC values.
+#'
+#' @seealso
+#' \code{\link{PIC}}, \code{\link[stats]{lm}}
+#'
 #' @export
 #'
 PIC.lm <- function(object, newdata, group_sizes = NULL, ...){

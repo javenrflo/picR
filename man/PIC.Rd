@@ -2,21 +2,35 @@
 % Please edit documentation in R/PIC.R
 \name{PIC}
 \alias{PIC}
-\title{Compute Predictive Information Criteria (PIC)}
+\title{Predictive Information Criteria}
 \usage{
-PIC(object, ...)
+PIC(object, newdata, ...)
 }
 \arguments{
-\item{object}{a model object to evaluate via predictive information criteria (PIC)}
+\item{object}{A fitted model object on which computed PIC value(s) are partially based.}
 
-\item{...}{additional arguments affecting the PIC computed}
+\item{newdata}{An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.}
+
+\item{...}{Further arguments passed to other methods.}
 }
 \value{
-The form of the value returned by PIC depends on the class of its argument and the additional arguments supplied. See the documentation of the particular method(s) for details of what is produced by that method.
+The form of the value returned by \code{PIC} depends on the fitted model class and its method-specific arguments. Details may be found in the documentation of each method.
 }
 \description{
-PIC is a generic function for computing PIC from the results of various model fitting functions. The function invokes particular \emph{methods} which depend on the class of the first argument.
+\code{PIC} is a generic function for computing predictive information criteria.
+Depending on the fitted model object \code{\link[base]{class}}, the function invokes the appropriate method for
+determining PIC value(s) for the supplied model.
 }
 \details{
-Currently, only a single method exists for this generic function. This method is for the class "lm" of linear models. Additional methods are in development.
+The PIC are criteria developed for model selection within predictive contexts. Given a
+set of predictive models, the model with the minimum criterion value is preferred.
+
+The PIC are developed to asymptotically select the candidate model that minimizes the mean
+squared error of prediction (MSEP), thus behaving similarly to the the Akaike Information
+Criterion (AIC). Contrasting with AIC, however, the PIC do not require the assumption of
+validation data that are independent and identically distributed to the set of training data.
+The PIC thus offer greater flexibility in predictive model selection applications.
+}
+\seealso{
+\code{\link{PIC.lm}}
 }

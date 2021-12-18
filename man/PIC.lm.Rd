@@ -2,25 +2,29 @@
 % Please edit documentation in R/PIC.R
 \name{PIC.lm}
 \alias{PIC.lm}
-\title{PIC method for Linear Model Fits}
+\title{PIC method for Linear Models}
 \usage{
 \method{PIC}{lm}(object, newdata, group_sizes = NULL, ...)
 }
 \arguments{
-\item{object}{Object of class inheriting from "lm"}
+\item{object}{A fitted model object of \code{\link[base]{class}} "lm".}
 
-\item{newdata}{An optional data frame in which to look for variables with which to compute PIC. If omitted, the fitted values are used.}
+\item{newdata}{An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.}
 
-\item{group_sizes}{A scalar or vector indicating the sizes of data partitions. See details.}
+\item{group_sizes}{A scalar or numeric vector indicating the sizes of \code{newdata} partitions. See 'Details'.}
 
-\item{...}{further arguments passed to or from other methods.}
+\item{...}{Further arguments passed to or from other methods.}
 }
 \value{
-value
+If \code{group_sizes = NULL}, a scalar is returned. Otherwise, \code{newdata} is
+returned with an appended column labeled 'PIC' containing group-specific PIC values.
 }
 \description{
-PIC method for Linear Model Fits
+Computation of predictive information criteria for linear models.
 }
 \details{
 PIC.lm computes PIC values based on the supplied model.
+}
+\seealso{
+\code{\link{PIC}}, \code{\link[stats]{lm}}
 }

@@ -1,10 +1,15 @@
 Package: picR
-Title: Enables Model Selection via the Predictive Information Criterion (PIC)
+Title: Predictive Information Criteria for Model Selection
 Version: 0.0.0.1
 Authors@R: 
     person("Javier", "Flores", , "javenrflo.pro@pm.me", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package offers function(s) that compute predictive information criteria (PIC) for model selection. The current version (0.0.0.1) only accommodates the computation of PIC for linear regression models.  
+Description: Computation of predictive information criteria (PIC) from select model object classes 
+    for model selection in predictive contexts. In contrast to the more widely used Akaike 
+    Information Criterion (AIC), which are derived under the assumption that target(s) of prediction 
+    (i.e. validation data) are independently and identically distributed to the fitting data, the PIC
+    are derived under less restrictive assumptions and thus generalize AIC to the more practically 
+    relevant case of training/validation data heterogeneity. 
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8

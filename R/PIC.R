@@ -24,7 +24,7 @@ PIC <- function(object, ...){
 #' @param ... further arguments passed to or from other methods.
 #'
 #' @details PIC.lm computes PIC values based on the supplied model.
-#' @return
+#' @return value
 #' @export
 #'
 PIC.lm <- function(object, newdata, group_sizes = NULL, ...){

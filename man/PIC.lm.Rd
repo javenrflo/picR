@@ -16,7 +16,7 @@
 \item{...}{further arguments passed to or from other methods.}
 }
 \value{
-
+value
 }
 \description{
 PIC method for Linear Model Fits

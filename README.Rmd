@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of picR is to ...
+Computation of predictive information criteria (PIC) from select model object classes for model selection in predictive contexts. In contrast to the more widely used Akaike Information Criterion (AIC), which are derived under the assumption that target(s) of prediction (i.e. validation data) are independently and identically distributed to the fitting data, the PIC are derived under less restrictive assumptions and thus generalize AIC to the more practically relevant case of training/validation data heterogeneity.
 
 ## Installation
 

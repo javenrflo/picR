@@ -3,7 +3,7 @@ Title: Predictive Information Criteria for Model Selection
 Version: 0.0.0.1
 Authors@R: 
     person("Javier", "Flores", , "javenrflo.pro@pm.me", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0000-0002-1550-1655"))
 Description: Computation of predictive information criteria (PIC) from select model object classes 
     for model selection in predictive contexts. In contrast to the more widely used Akaike 
     Information Criterion (AIC), which are derived under the assumption that target(s) of prediction 

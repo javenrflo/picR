@@ -10,8 +10,7 @@ Description: Computation of predictive information criteria (PIC) from select mo
     (i.e. validation data) are independently and identically distributed to the fitting data, the PIC
     are derived under less restrictive assumptions and thus generalize AIC to the more practically 
     relevant case of training/validation data heterogeneity. 
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

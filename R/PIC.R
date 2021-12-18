@@ -45,7 +45,7 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, ...){
 
   gof.pic <- rep(log(2*pi*sigma.mle^2) + 1, nn)
 
-  RS.dist <- diag(X.pred %*% inv.mat(crossprod(X.obs)) %*% t(X.pred))
+  RS.dist <- diag(X.pred %*% invmat(crossprod(X.obs)) %*% t(X.pred))
   pen.pic <- 2*(RS.dist + 1/nn)
 
   pic.vec <- gof.pic + pen.pic

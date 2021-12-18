@@ -1,1 +1,1 @@
-inv.mat <- function(x){chol2inv(chol(x))}
+invmat <- function(x){chol2inv(chol(x))}

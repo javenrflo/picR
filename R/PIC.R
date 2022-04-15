@@ -40,14 +40,38 @@ PIC <- function(object, newdata, ...){
 #' @description Computation of predictive information criteria for linear models.
 #'
 #' @param object A fitted model object of \code{\link[base]{class}} "lm".
-#' @param newdata An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.
-#' @param group_sizes A scalar or numeric vector indicating the sizes of \code{newdata} partitions. See 'Details'.
+#' @param newdata An optional data frame of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.
+#' @param group_sizes An optional scalar or numeric vector indicating the sizes of \code{newdata} partitions. If omitted, \code{newdata} is not partitioned. See 'Details'.
 #' @param ... Further arguments passed to or from other methods.
 #'
-#' @details PIC.lm computes PIC values based on the supplied model.
+#' @details \code{PIC.lm} computes PIC values based on the supplied model. Candidate models with relatively smaller criterion values are preferred.
+#' Depending on the value(s) supplied to \code{group_sizes}, one of three implementations of PIC are computed:
+#'
+#' \itemize{
+#'   \item \strong{iPIC}: The individualized predictive information criterion (iPIC) is computed when \code{group_sizes = 1}. A value
+#'   of iPIC is determined for each \emph{individual} observation in \code{newdata}. Using iPIC, one may thus select optimal predictive
+#'   models specific to each particular validation datapoint.
+#'
+#'   \item \strong{gPIC}: The group predictive information criterion (gPIC) is computed when \code{group_sizes > 1} or
+#'   \code{is.vector(group_sizes) == TRUE}. A value of gPIC is determined for each cohort or \emph{group} of observations
+#'   defined by the partitions of \code{newdata}. Using gPIC, one may thus select optimal predictive models specific to each
+#'   group of validation datapoints. For the class of regression models, the gPIC value of a group of validation observations
+#'   is equivalent to the sum of their individual iPIC values.
+#'
+#'   \item \strong{tPIC}: The total predictive information criterion (tPIC) is computed when \code{group_sizes = NULL}. Computation of
+#'   the tPIC is the default, and one may use the tPIC to select the optimal predictive model for the entire set of validation
+#'   datapoints. The tPIC and gPIC are equivalent when \code{group_sizes = m}, where \code{m} is the number of observations in
+#'   \code{newdata}.
+#' }
+#'
+#' The general formula used to compute the PIC for linear regression models is...
+#' provide formula, define terms, share criterion insights re: penalty and goodness of fit. Give
+#' pros/cons of using iPIC vs gPIC vs tPIC. Essentially, give an abridged discussion from pages 43-48
+#' of thesis.
 #'
 #' @return If \code{group_sizes = NULL}, a scalar is returned. Otherwise, \code{newdata} is
-#' returned with an appended column labeled 'PIC' containing group-specific PIC values.
+#' returned with an appended column labeled 'PIC' containing either iPIC or gPIC values,
+#' depending on what was provided to \code{group_sizes}.
 #'
 #' @seealso
 #' \code{\link[picR]{PIC}}, \code{\link[stats]{lm}}

@@ -1,26 +1,32 @@
 #' Predictive Information Criteria
 #'
-#' @description \code{PIC} is a generic function for computing predictive information criteria.
-#' Depending on the fitted model object \code{\link[base]{class}}, the function invokes the appropriate method for
-#' determining PIC value(s) for the supplied model.
+#' @description \code{PIC} is a generic function for computing predictive information criteria (PIC).
+#' Depending on the \code{\link[base]{class}} of the fitted model supplied to \code{object}, the function
+#' invokes the appropriate method for computing PIC.
 #'
-#' @param object A fitted model object on which computed PIC value(s) are partially based.
-#' @param newdata An optional data frame of validation data which may also inform the computation of PIC. If omitted, the training data contained within the fitted model \code{object} are used.
+#' @param object A fitted model.
+#' @param newdata An optional data frame of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.
 #' @param ... Further arguments passed to other methods.
 #'
-#' @details The PIC are criteria developed for model selection within predictive contexts. Given a
-#' set of predictive models, the model with the minimum criterion value is preferred.
+#' @details The PIC are model selection criteria that may be used to select from among predictive models in a candidate set.
+#' The model with the minimum criterion value is preferred.
 #'
-#' The PIC are developed to asymptotically select the candidate model that minimizes the mean
-#' squared error of prediction (MSEP), thus behaving similarly to the the Akaike Information
-#' Criterion (AIC). Contrasting with AIC, however, the PIC do not require the assumption of
-#' validation data that are independent and identically distributed to the set of training data.
-#' The PIC thus offer greater flexibility in predictive model selection applications.
+#' The PIC asymptotically select the candidate model that minimizes the mean squared error of prediction (MSEP),
+#' thus behaving similarly to the the Akaike Information Criterion (AIC). However in contrast to the AIC, the PIC
+#' do not assume a panel of validation data that are independent and identically distributed to the set of training
+#' data. The PIC are thus better able to accommodate training/validation data \emph{heterogeneity}, where training
+#' and validation data may differ from one another in distribution.
 #'
-#' @return The form of the value returned by \code{PIC} depends on the fitted model class and its method-specific arguments. Details may be found in the documentation of each method.
+#' Data heterogeneity is arguably the more typical circumstance in practice, especially when one considers applications
+#' where a set of covariates are used to model and predict some response. In these regression contexts, one more often predicts
+#' values of the response for combinations of covariate values that were not necessarily used to train the predictive model.
+#'
+#'
+#' @return The form of the value returned by \code{PIC} depends on the fitted model class and its method-specific arguments.
+#' Details may be found in the documentation of each method.
 #'
 #' @seealso
-#' \code{\link{PIC.lm}}
+#' \code{\link[picR]{PIC.lm}}
 #'
 #' @export
 #'
@@ -44,7 +50,7 @@ PIC <- function(object, newdata, ...){
 #' returned with an appended column labeled 'PIC' containing group-specific PIC values.
 #'
 #' @seealso
-#' \code{\link{PIC}}, \code{\link[stats]{lm}}
+#' \code{\link[picR]{PIC}}, \code{\link[stats]{lm}}
 #'
 #' @export
 #'

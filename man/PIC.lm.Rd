@@ -26,5 +26,5 @@ Computation of predictive information criteria for linear models.
 PIC.lm computes PIC values based on the supplied model.
 }
 \seealso{
-\code{\link{PIC}}, \code{\link[stats]{lm}}
+\code{\link[picR]{PIC}}, \code{\link[stats]{lm}}
 }

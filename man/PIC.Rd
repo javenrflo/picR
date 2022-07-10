@@ -9,7 +9,7 @@ PIC(object, newdata, ...)
 \arguments{
 \item{object}{A fitted model.}
 
-\item{newdata}{An optional data frame of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.}
+\item{newdata}{An optional dataframe of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.}
 
 \item{...}{Further arguments passed to other methods.}
 }

@@ -4,7 +4,7 @@
 \alias{PIC.lm}
 \title{PIC method for Linear Models}
 \usage{
-\method{PIC}{lm}(object, newdata, group_sizes = NULL, ...)
+\method{PIC}{lm}(object, newdata, group_sizes = NULL, bootstraps = NULL, ...)
 }
 \arguments{
 \item{object}{A fitted model object of \code{\link[base]{class}} "lm".}
@@ -13,12 +13,14 @@
 
 \item{group_sizes}{An optional scalar or numeric vector indicating the sizes of \code{newdata} partitions. If omitted, \code{newdata} is not partitioned. See 'Details'.}
 
+\item{bootstraps}{An optional numeric value indicating the number of bootstrap samples to use for a bootstrapped PIC. See 'Details'.}
+
 \item{...}{Further arguments passed to or from other methods.}
 }
 \value{
-If \code{group_sizes = NULL}, a scalar is returned. Otherwise, \code{newdata} is
+If \code{group_sizes = NULL} or \code{bootstraps > 0}, a scalar is returned. Otherwise, \code{newdata} is
 returned with an appended column labeled 'PIC' containing either iPIC or gPIC values,
-depending on what was provided to \code{group_sizes}.
+depending on the value provided to \code{group_sizes}.
 }
 \description{
 Computation of predictive information criteria for linear models.
@@ -43,6 +45,11 @@ the tPIC is the default, and one may use the tPIC to select the optimal predicti
 datapoints. The tPIC and gPIC are equivalent when \code{group_sizes = m}, where \code{m} is the number of observations in
 \code{newdata}.
 }
+
+If a numeric value is supplied to \code{bootstraps} the total Predictive information criterion (tPIC) is computed \code{bootstraps} times, where each
+generated bootstrap sample is used as validation data in computing tPIC. The resulting tPIC values are then averaged to generate a single, bootstrapped
+tPIC value. Model selection based on this bootstrapped tPIC value may lead to the selection of a more generally applicable predictive model whose
+predictive accuracy is not strictly optimized to a particular set of validation data.
 
 The general formula used to compute the PIC for linear regression models is...
 provide formula, define terms, share criterion insights re: penalty and goodness of fit. Give

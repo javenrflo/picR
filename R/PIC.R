@@ -302,7 +302,7 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 #'
 PIC.mlm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 
-  if(class(object) != "mlm"){
+  if(!any(class(object) %in% "mlm")){
     stop('object must be of class "mlm"')
   }
 

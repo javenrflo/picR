@@ -7,9 +7,9 @@
 PIC(object, newdata, ...)
 }
 \arguments{
-\item{object}{A fitted model.}
+\item{object}{A fitted model object.}
 
-\item{newdata}{An optional dataframe of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.}
+\item{newdata}{An optional dataframe to be used as validation data in computing PIC. If omitted, the training data contained within \strong{\code{object}} are used.}
 
 \item{...}{Further arguments passed to other methods.}
 }
@@ -18,8 +18,8 @@ The form of the value returned by \code{PIC} depends on the fitted model class a
 Details may be found in the documentation of each method.
 }
 \description{
-\code{PIC} is a generic function for computing predictive information criteria (PIC).
-Depending on the \code{\link[base]{class}} of the fitted model supplied to \code{object}, the function
+\code{PIC} is the S3 generic function for computing predictive information criteria (PIC).
+Depending on the \code{\link[base]{class}} of the fitted model supplied to \strong{\code{object}}, the function
 invokes the appropriate method for computing PIC.
 }
 \details{
@@ -29,13 +29,19 @@ The model with the minimum criterion value is preferred.
 The PIC asymptotically select the candidate model that minimizes the mean squared error of prediction (MSEP),
 thus behaving similarly to the the Akaike Information Criterion (AIC). However in contrast to the AIC, the PIC
 do not assume a panel of validation data that are independent and identically distributed to the set of training
-data. The PIC are thus better able to accommodate training/validation data \emph{heterogeneity}, where training
+data. This effectively enables the PIC to accommodate training/validation data \emph{heterogeneity}, where training
 and validation data may differ from one another in distribution.
 
 Data heterogeneity is arguably the more typical circumstance in practice, especially when one considers applications
-where a set of covariates are used to model and predict some response. In these regression contexts, one more often predicts
-values of the response for combinations of covariate values that were not necessarily used to train the predictive model.
+where a set of covariates are used to model and predict some response. In these regression contexts, one often predicts
+values of the response at combinations of covariate values not necessarily used in training the predictive model.
+}
+\examples{
+data("mtcars")
+mod <- lm(mpg ~ hp + wt, data = mtcars)
+PIC(mod)
+
 }
 \seealso{
-\code{\link[picR]{PIC.lm}}
+\code{\link[picR]{PIC.lm}}, \code{\link[picR]{PIC.mlm}}
 }

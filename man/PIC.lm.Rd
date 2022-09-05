@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{A fitted model object of \code{\link[base]{class}} "lm".}
 
-\item{newdata}{An optional data frame of validation data used to compute PIC. If omitted, the training data contained within \code{object} are used.}
+\item{newdata}{An optional dataframe to be used as validation data in computing PIC. If omitted, the training data contained within \code{object} are used.}
 
 \item{group_sizes}{An optional scalar or numeric vector indicating the sizes of \code{newdata} partitions. If omitted, \code{newdata} is not partitioned. See 'Details'.}
 
@@ -26,36 +26,71 @@ depending on the value provided to \code{group_sizes}.
 Computation of predictive information criteria for linear models.
 }
 \details{
-\code{PIC.lm} computes PIC values based on the supplied model. Candidate models with relatively smaller criterion values are preferred.
-Depending on the value(s) supplied to \code{group_sizes}, one of three implementations of PIC are computed:
+\code{PIC.lm} computes PIC values based on the supplied regression model. Candidate models with relatively smaller criterion values are preferred.
+Depending on the value(s) supplied to \strong{\code{group_sizes}}, one of three implementations of PIC are computed:
 
 \itemize{
-\item \strong{iPIC}: The individualized predictive information criterion (iPIC) is computed when \code{group_sizes = 1}. A value
-of iPIC is determined for each \emph{individual} observation in \code{newdata}. Using iPIC, one may thus select optimal predictive
+\item \strong{iPIC}: The individualized predictive information criterion (iPIC) is computed when \strong{\code{group_sizes = 1}}. A value
+of iPIC is determined for each \emph{individual} observation in \strong{\code{newdata}}. Using iPIC, one may thus select optimal predictive
 models specific to each particular validation datapoint.
 
-\item \strong{gPIC}: The group predictive information criterion (gPIC) is computed when \code{group_sizes > 1} or
-\code{is.vector(group_sizes) == TRUE}. A value of gPIC is determined for each cohort or \emph{group} of observations
-defined by the partitions of \code{newdata}. Using gPIC, one may thus select optimal predictive models specific to each
+\item \strong{gPIC}: The group predictive information criterion (gPIC) is computed when \strong{\code{group_sizes > 1}} or
+\strong{\code{is.vector(group_sizes) == TRUE}}. A value of gPIC is determined for each cohort or \emph{group} of observations
+defined by the partitions of \strong{\code{newdata}}. Using gPIC, one may thus select optimal predictive models specific to each
 group of validation datapoints. For the class of regression models, the gPIC value of a group of validation observations
 is equivalent to the sum of their individual iPIC values.
 
-\item \strong{tPIC}: The total predictive information criterion (tPIC) is computed when \code{group_sizes = NULL}. Computation of
+\item \strong{tPIC}: The total predictive information criterion (tPIC) is computed when \strong{\code{group_sizes = NULL}}. Computation of
 the tPIC is the default, and one may use the tPIC to select the optimal predictive model for the entire set of validation
-datapoints. The tPIC and gPIC are equivalent when \code{group_sizes = m}, where \code{m} is the number of observations in
-\code{newdata}.
+datapoints. The tPIC and gPIC are equivalent when \strong{\code{group_sizes = m}}, where \code{m} is the number of observations in
+\strong{\code{newdata}}. When \strong{\code{newdata}} is not supplied, tPIC is exactly equivalent to the Akaike Information Criterion (\link[stats]{AIC}).
 }
 
-If a numeric value is supplied to \code{bootstraps} the total Predictive information criterion (tPIC) is computed \code{bootstraps} times, where each
-generated bootstrap sample is used as validation data in computing tPIC. The resulting tPIC values are then averaged to generate a single, bootstrapped
-tPIC value. Model selection based on this bootstrapped tPIC value may lead to the selection of a more generally applicable predictive model whose
+If a numeric value is supplied to \strong{\code{bootstraps}} the total Predictive information criterion (tPIC) is computed \strong{\code{bootstraps}} times, where
+generated bootstrap samples are each used as sets of validation data in computing the tPIC. The resulting tPIC values are then averaged to generate a single,
+bootstrapped tPIC value. Model selection based on this bootstrapped tPIC value may lead to the selection of a more generally applicable predictive model whose
 predictive accuracy is not strictly optimized to a particular set of validation data.
 
-The general formula used to compute the PIC for linear regression models is...
-provide formula, define terms, share criterion insights re: penalty and goodness of fit. Give
-pros/cons of using iPIC vs gPIC vs tPIC. Essentially, give an abridged discussion from pages 43-48
-of thesis.
+For further details, see \href{https://iro.uiowa.edu/esploro/outputs/doctoral/A-new-class-of-information-criteria/9984097169902771?institution=01IOWA_INST}{\emph{A new class of information criteria for improved prediction in the presence of training/validation data heterogeneity}}.
+}
+\examples{
+require(dplyr, quietly = TRUE)
+set.seed(1)
+
+# Generate data
+tdat <- data.frame(replicate(10, rnorm(20))) \%>\%
+dplyr::mutate(y = X1 + X2 + rnorm(20))
+# Fit a regression model
+mod <- lm(y ~ X1, data = tdat)
+class(mod)
+
+# Generate validation data
+vdat <- data.frame(replicate(10, rnorm(20))) \%>\%
+dplyr::mutate(y1 = X1 + X2 + rnorm(20))
+
+# tPIC, newdata not supplied
+PIC(object = mod)
+AIC(mod) # equivalent to PIC since training and validation data are the same above
+
+# tPIC, newdata supplied
+PIC(object = mod, newdata = vdat)
+AIC(mod) # not equivalent to PIC since training and validation data differ above
+
+# gPIC
+PIC(object = mod, newdata = vdat, group_sizes = c(5,4,1,3,2,5))
+PIC(object = mod, newdata = vdat, group_sizes = 5)
+
+# iPIC
+PIC(object = mod, newdata = vdat, group_sizes = rep(1, 20))
+PIC(object = mod, newdata = vdat, group_sizes = 1)
+
+# bootstrapped tPIC (based on 10 bootstrap samples)
+PIC(object = mod, bootstraps = 10)
+
+}
+\references{
+Flores, J.E. (2021), \emph{A new class of information criteria for improved prediction in the presence of training/validation data heterogeneity} [Unpublished PhD dissertation]. University of Iowa.
 }
 \seealso{
-\code{\link[picR]{PIC}}, \code{\link[stats]{lm}}
+\code{\link[picR]{PIC}}, \code{\link[picR]{PIC.mlm}}, \code{\link[stats]{lm}}
 }

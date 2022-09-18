@@ -54,19 +54,15 @@ predictive accuracy is not strictly optimized to a particular set of validation 
 For further details, see \href{https://iro.uiowa.edu/esploro/outputs/doctoral/A-new-class-of-information-criteria/9984097169902771?institution=01IOWA_INST}{\emph{A new class of information criteria for improved prediction in the presence of training/validation data heterogeneity}}.
 }
 \examples{
-require(dplyr, quietly = TRUE)
-set.seed(1)
+data(iris)
 
-# Generate data
-tdat <- data.frame(replicate(10, rnorm(20))) \%>\%
-dplyr::mutate(y = X1 + X2 + rnorm(20))
 # Fit a regression model
-mod <- lm(y ~ X1, data = tdat)
+mod <- lm(Sepal.Length ~ ., data = iris)
 class(mod)
 
-# Generate validation data
-vdat <- data.frame(replicate(10, rnorm(20))) \%>\%
-dplyr::mutate(y1 = X1 + X2 + rnorm(20))
+# Hypothetical validation data
+set.seed(1)
+vdat <- iris[sample(1:nrow(iris), 10),]
 
 # tPIC, newdata not supplied
 PIC(object = mod)
@@ -77,14 +73,15 @@ PIC(object = mod, newdata = vdat)
 AIC(mod) # not equivalent to PIC since training and validation data differ above
 
 # gPIC
-PIC(object = mod, newdata = vdat, group_sizes = c(5,4,1,3,2,5))
+PIC(object = mod, newdata = vdat, group_sizes = c(5,3,2))
 PIC(object = mod, newdata = vdat, group_sizes = 5)
 
 # iPIC
-PIC(object = mod, newdata = vdat, group_sizes = rep(1, 20))
+PIC(object = mod, newdata = vdat, group_sizes = rep(1, 10))
 PIC(object = mod, newdata = vdat, group_sizes = 1)
 
 # bootstrapped tPIC (based on 10 bootstrap samples)
+set.seed(1)
 PIC(object = mod, bootstraps = 10)
 
 }

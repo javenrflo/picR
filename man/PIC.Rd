@@ -37,9 +37,26 @@ where a set of covariates are used to model and predict some response. In these 
 values of the response at combinations of covariate values not necessarily used in training the predictive model.
 }
 \examples{
-data("mtcars")
-mod <- lm(mpg ~ hp + wt, data = mtcars)
-PIC(mod)
+data(iris)
+
+# Fit a regression model
+mod <- lm(Sepal.Length ~ Sepal.Width + Species, data = iris)
+PIC(object  = mod,
+    newdata = data.frame(Sepal.Width = c(0.25, 1.74, 2.99),
+                         Species = factor(c("setosa", "virginica", "virginica"),
+                                          levels = c("setosa", "versicolor", "virginica"))))
+
+# Fit a bivariable regression model
+mod <- lm(cbind(Sepal.Length, Sepal.Width) ~ Species + Petal.Length, data = iris)
+# Note: For multivariable models, response variable columns must be included if
+#       newdata is specified. If the values of the validation response(s) are
+#       unknown, specify NA. If partially observed, specify NA only where unknown.
+PIC(object  = mod,
+    newdata = data.frame(Sepal.Length = c(4.1, NA, NA),
+                         Sepal.Width  = c(NA,NA,3.2),
+                         Petal.Length = c(1.2, 3.5, 7),
+                         Species = factor(c("setosa", "virginica", "virginica"),
+                                          levels = c("setosa", "versicolor", "virginica"))))
 
 }
 \seealso{

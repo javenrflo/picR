@@ -26,9 +26,26 @@
 #' Details may be found in the documentation of each method.
 #'
 #' @examples
-#' data("mtcars")
-#' mod <- lm(mpg ~ hp + wt, data = mtcars)
-#' PIC(mod)
+#' data(iris)
+#'
+#' # Fit a regression model
+#' mod <- lm(Sepal.Length ~ Sepal.Width + Species, data = iris)
+#' PIC(object  = mod,
+#'     newdata = data.frame(Sepal.Width = c(0.25, 1.74, 2.99),
+#'                          Species = factor(c("setosa", "virginica", "virginica"),
+#'                                           levels = c("setosa", "versicolor", "virginica"))))
+#'
+#' # Fit a bivariable regression model
+#' mod <- lm(cbind(Sepal.Length, Sepal.Width) ~ Species + Petal.Length, data = iris)
+#' # Note: For multivariable models, response variable columns must be included if
+#' #       newdata is specified. If the values of the validation response(s) are
+#' #       unknown, specify NA. If partially observed, specify NA only where unknown.
+#' PIC(object  = mod,
+#'     newdata = data.frame(Sepal.Length = c(4.1, NA, NA),
+#'                          Sepal.Width  = c(NA,NA,3.2),
+#'                          Petal.Length = c(1.2, 3.5, 7),
+#'                          Species = factor(c("setosa", "virginica", "virginica"),
+#'                                           levels = c("setosa", "versicolor", "virginica"))))
 #'
 #' @seealso
 #' \code{\link[picR]{PIC.lm}}, \code{\link[picR]{PIC.mlm}}
@@ -89,19 +106,15 @@ PIC <- function(object, newdata, ...){
 #' Flores, J.E. (2021), *A new class of information criteria for improved prediction in the presence of training/validation data heterogeneity* \[Unpublished PhD dissertation\]. University of Iowa.
 #'
 #' @examples
-#' require(dplyr, quietly = TRUE)
-#' set.seed(1)
+#' data(iris)
 #'
-#' # Generate data
-#' tdat <- data.frame(replicate(10, rnorm(20))) %>%
-#' dplyr::mutate(y = X1 + X2 + rnorm(20))
 #' # Fit a regression model
-#' mod <- lm(y ~ X1, data = tdat)
+#' mod <- lm(Sepal.Length ~ ., data = iris)
 #' class(mod)
 #'
-#' # Generate validation data
-#' vdat <- data.frame(replicate(10, rnorm(20))) %>%
-#' dplyr::mutate(y1 = X1 + X2 + rnorm(20))
+#' # Hypothetical validation data
+#' set.seed(1)
+#' vdat <- iris[sample(1:nrow(iris), 10),]
 #'
 #' # tPIC, newdata not supplied
 #' PIC(object = mod)
@@ -112,25 +125,26 @@ PIC <- function(object, newdata, ...){
 #' AIC(mod) # not equivalent to PIC since training and validation data differ above
 #'
 #' # gPIC
-#' PIC(object = mod, newdata = vdat, group_sizes = c(5,4,1,3,2,5))
+#' PIC(object = mod, newdata = vdat, group_sizes = c(5,3,2))
 #' PIC(object = mod, newdata = vdat, group_sizes = 5)
 #'
 #' # iPIC
-#' PIC(object = mod, newdata = vdat, group_sizes = rep(1, 20))
+#' PIC(object = mod, newdata = vdat, group_sizes = rep(1, 10))
 #' PIC(object = mod, newdata = vdat, group_sizes = 1)
 #'
 #' # bootstrapped tPIC (based on 10 bootstrap samples)
+#' set.seed(1)
 #' PIC(object = mod, bootstraps = 10)
 #'
 #' @export
 #'
 PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
-  if(class(object) != "lm"){
+  if(!inherits(object, "lm")){
     stop('object must be of class "lm"')
   }
 
   if(!missing(newdata)){
-    if(!any(class(newdata) %in% "data.frame")){
+    if(!inherits(newdata, "data.frame")){
       stop('newdata must be a data.frame')
     }
   }
@@ -147,8 +161,10 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 
     btPICs <- lapply(1:bootstraps,
                      function(x, object, ...){
-                       # PROBLEM TO FIX: model.matrix is problematic here when categorical variables exist
-                       btdata <- data.frame(stats::model.matrix(object)[,-1,drop = FALSE])
+                       vars <- as.character(attr(object$terms, "variables"))[-1] ## [1] is the list call
+                       yidx <- attr(object$terms, "response") # index of response var
+
+                       btdata <- object$model[, vars[-yidx], drop = FALSE] # select all but the response
                        bidx   <- sample(1:dim(btdata)[1], size = dim(btdata)[1], replace = TRUE)
                        btdata <- btdata[bidx,,drop = FALSE]
                        PIC(object = object, newdata = btdata,
@@ -164,15 +180,14 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
     X.pred  <- X.obs
     newdata <- object$model
   } else {
-    tt <- stats::terms(object)
-    Terms <- stats::delete.response(tt)
+    Terms <- stats::delete.response(object$terms)
     X.pred <- stats::model.matrix(Terms, newdata)
   }
 
   sigma.mle <- sqrt(crossprod(object$residuals)/nrow(X.obs))
   nn        <- nrow(X.obs)
 
-  gof.pic <- rep(log(2*pi*sigma.mle^2) + 1, nn)
+  gof.pic <- rep(log(2*pi*sigma.mle^2) + 1, nrow(X.pred))
 
   RS.dist <- diag(X.pred %*% invmat(crossprod(X.obs)) %*% t(X.pred))
   pen.pic <- 2*(RS.dist + 1/nn)
@@ -185,8 +200,9 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 
   } else{
     if(length(group_sizes) == 1){
-
-      if(group_sizes == length(pic.vec)){
+      if(group_sizes > nrow(X.pred)){
+        stop("The largest size of a single group must be less than or equal to the total number of predicted observations.")
+      } else if(group_sizes == nrow(X.pred)){
 
         return(sum(pic.vec))
 
@@ -200,7 +216,7 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 
     } else{
       if(sum(group_sizes) != nrow(X.pred)){
-        stop("Sum of supplied group sizes does not match total predicted observations.")
+        stop("Sum of supplied group sizes does not match the total number of predicted observations.")
       } else{
         gpic    <- split(pic.vec, rep(1:length(group_sizes), group_sizes))
         gpic    <- lapply(gpic, sum)
@@ -273,63 +289,84 @@ PIC.lm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 #'
 #' @examples
 #' require(dplyr, quietly = TRUE)
-#' set.seed(1)
+#' data(iris)
 #'
-#' # Generate bivariate data
-#' tdat <- data.frame(replicate(10, rnorm(20))) %>%
-#' dplyr::mutate(y1 = X1 + X2 + rnorm(20),
-#'               y2 = X1 + X2 + rnorm(20))
 #' # Fit a bivariable regression model
-#' mod <- lm(cbind(y1, y2) ~ X1, data = tdat)
+#' mod <- lm(cbind(Sepal.Length, Sepal.Width) ~ ., data = iris)
 #' class(mod)
 #'
-#' # Generate validation data
-#' vdat <- data.frame(replicate(10, rnorm(20))) %>%
-#' dplyr::mutate(y1 = X1 + X2 + rnorm(20),
-#'               y2 = X1 + X2 + rnorm(20))
+#' # Hypothetical validation data
+#' set.seed(1)
+#' vdat <- iris[sample(1:nrow(iris), 10),]
 #'
 #' # tPIC, completely unobserved response data
-#' PIC(object = mod, newdata = vdat %>% dplyr::mutate(y1 = NA, y2 = NA))
+#' PIC(object = mod, newdata = vdat %>% dplyr::mutate(Sepal.Length = NA, Sepal.Width = NA))
 #'
 #' # tPIC, partially unobserved response data
-#' PIC(object = mod, newdata = vdat %>% dplyr::mutate(y1 = NA))
+#' PIC(object = mod, newdata = vdat %>% dplyr::mutate(Sepal.Length = NA))
 #'
 #' # tPIC, mix of completely and partially unobserved cases.
 #' PIC(object = mod, newdata = vdat %>%
-#' dplyr::mutate(y1 = ifelse(y1 < 1, NA, y1), y2 = ifelse(y2 > 0, NA, y2)))
+#' dplyr::mutate(Sepal.Length = ifelse(Sepal.Length < 6, NA, Sepal.Length),
+#' Sepal.Width = ifelse(Sepal.Width < 3.3, NA, Sepal.Width)))
+#'
+#' # tPIC, newdata not supplied
+#' PIC(object = mod)
+#'
+#' # gPIC
+#' PIC(object = mod, newdata = vdat, group_sizes = c(5,3,2))
+#' PIC(object = mod, newdata = vdat, group_sizes = 5)
+#'
+#' # iPIC
+#' PIC(object = mod, newdata = vdat, group_sizes = rep(1, 10))
+#' PIC(object = mod, newdata = vdat, group_sizes = 1)
+#'
+#' # bootstrapped tPIC (based on 10 bootstrap samples)
+#' set.seed(1)
+#' PIC(object = mod, bootstraps = 10)
 #'
 #' @export
 #'
 PIC.mlm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...){
 
-  if(!any(class(object) %in% "mlm")){
+  if(!inherits(object, "mlm")){
     stop('object must be of class "mlm"')
   }
 
+  vars <- as.character(attr(object$terms, "variables"))[-1] ## [1] is the list call
+  yidx <- attr(object$terms, "response") # index of response var
+  if(length(setdiff(all.vars(object$terms), vars[-yidx])) > 2){
+    stop('Only bivariable response models are currently supported')
+  }
+
   if(!missing(newdata)){
-    if(!any(class(newdata) %in% "data.frame")){
+    if(!inherits(newdata, "data.frame")){
       stop('newdata must be a data.frame')
+    }
+    if(any(!(setdiff(all.vars(object$terms), vars[-yidx]) %in% names(newdata)))){
+      stop('newdata must contain columns corresponding to each of the response variables. Values in these columns may be set to NA if the multivariate response is completely unobserved and should otherwise contain observed response values for cases where the multivariate response is partially observed.')
     }
   }
 
   if(!is.null(bootstraps)){
-    if(bootstraps <= 0){
-      stop("bootstraps must be greater than 0")
-    }
 
     if(length(bootstraps) != 1){
       stop("bootstraps must be a scalar")
     }
 
+    if(bootstraps <= 0){
+      stop("bootstraps must be greater than 0")
+    }
+
     btPICs <- lapply(1:bootstraps,
-                     function(x, object, ...){
-                       btdata <- data.frame(stats::model.matrix(object)[,-1,drop = FALSE])
+                     function(x, object, vars, yidx, ...){
+                       btdata <- object$model[, vars[-yidx], drop = FALSE] # select all but the response
                        bidx   <- sample(1:dim(btdata)[1], size = dim(btdata)[1], replace = TRUE)
                        btdata <- btdata[bidx,,drop = FALSE]
-                       btdata[, setdiff(all.vars(object$terms), colnames(btdata))] <- NA
+                       btdata[, setdiff(all.vars(object$terms), vars[-yidx])] <- NA
                        PIC(object = object, newdata = btdata,
                            group_sizes = NULL, bootstraps = NULL)
-                     }, object = object)
+                     }, object = object, vars = vars, yidx = yidx)
 
     return(mean(Reduce("c", btPICs)))
   }
@@ -344,11 +381,10 @@ PIC.mlm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...)
     nomiss.rsp.idx <- vector("list", length = nrow(X.pred))
 
   } else {
-    tt <- stats::terms(object)
-    Terms <- stats::delete.response(tt)
+    Terms <- stats::delete.response(object$terms)
     X.pred <- stats::model.matrix(Terms, newdata)
 
-    newdata.rsp <- newdata[setdiff(all.vars(object$terms), colnames(X.pred))]
+    newdata.rsp <- newdata[setdiff(all.vars(object$terms), vars[-yidx])]
     nomiss.rsp.idx <- apply(newdata.rsp, 1, function(x){which(!is.na(x))}, simplify = FALSE)
   }
 
@@ -393,7 +429,9 @@ PIC.mlm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...)
 
   } else{
     if(length(group_sizes) == 1){
-      if(group_sizes == length(pic.vec)){
+      if(group_sizes > nrow(X.pred)){
+        stop("The largest size of a single group must be less than or equal to the total number of predicted observations.")
+      } else if(group_sizes == nrow(X.pred)){
 
         return(sum(pic.vec))
 
@@ -407,7 +445,7 @@ PIC.mlm <- function(object, newdata, group_sizes = NULL, bootstraps = NULL, ...)
 
     } else{
       if(sum(group_sizes) != nrow(X.pred)){
-        stop("Sum of supplied group sizes does not match total predicted observations.")
+        stop("Sum of supplied group sizes does not match the total number of predicted observations.")
       } else{
         gpic    <- split(pic.vec, rep(1:length(group_sizes), group_sizes))
         gpic    <- lapply(gpic, sum)

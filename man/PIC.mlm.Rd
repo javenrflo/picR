@@ -61,30 +61,41 @@ For further details, see \href{https://iro.uiowa.edu/esploro/outputs/doctoral/A-
 }
 \examples{
 require(dplyr, quietly = TRUE)
-set.seed(1)
+data(iris)
 
-# Generate bivariate data
-tdat <- data.frame(replicate(10, rnorm(20))) \%>\%
-dplyr::mutate(y1 = X1 + X2 + rnorm(20),
-              y2 = X1 + X2 + rnorm(20))
 # Fit a bivariable regression model
-mod <- lm(cbind(y1, y2) ~ X1, data = tdat)
+mod <- lm(cbind(Sepal.Length, Sepal.Width) ~ ., data = iris)
 class(mod)
 
-# Generate validation data
-vdat <- data.frame(replicate(10, rnorm(20))) \%>\%
-dplyr::mutate(y1 = X1 + X2 + rnorm(20),
-              y2 = X1 + X2 + rnorm(20))
+# Hypothetical validation data
+set.seed(1)
+vdat <- iris[sample(1:nrow(iris), 10),]
 
 # tPIC, completely unobserved response data
-PIC(object = mod, newdata = vdat \%>\% dplyr::mutate(y1 = NA, y2 = NA))
+PIC(object = mod, newdata = vdat \%>\% dplyr::mutate(Sepal.Length = NA, Sepal.Width = NA))
 
 # tPIC, partially unobserved response data
-PIC(object = mod, newdata = vdat \%>\% dplyr::mutate(y1 = NA))
+PIC(object = mod, newdata = vdat \%>\% dplyr::mutate(Sepal.Length = NA))
 
 # tPIC, mix of completely and partially unobserved cases.
 PIC(object = mod, newdata = vdat \%>\%
-dplyr::mutate(y1 = ifelse(y1 < 1, NA, y1), y2 = ifelse(y2 > 0, NA, y2)))
+dplyr::mutate(Sepal.Length = ifelse(Sepal.Length < 6, NA, Sepal.Length),
+Sepal.Width = ifelse(Sepal.Width < 3.3, NA, Sepal.Width)))
+
+# tPIC, newdata not supplied
+PIC(object = mod)
+
+# gPIC
+PIC(object = mod, newdata = vdat, group_sizes = c(5,3,2))
+PIC(object = mod, newdata = vdat, group_sizes = 5)
+
+# iPIC
+PIC(object = mod, newdata = vdat, group_sizes = rep(1, 10))
+PIC(object = mod, newdata = vdat, group_sizes = 1)
+
+# bootstrapped tPIC (based on 10 bootstrap samples)
+set.seed(1)
+PIC(object = mod, bootstraps = 10)
 
 }
 \references{

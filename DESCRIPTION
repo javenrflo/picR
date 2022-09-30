@@ -1,6 +1,6 @@
 Package: picR
 Title: Predictive Information Criteria for Model Selection
-Version: 0.0.0.1
+Version: 1.0.0
 Authors@R: 
     person("Javier", "Flores", , "javenrflo.pro@pm.me", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-1550-1655"))
@@ -24,4 +24,3 @@ Suggests:
 Config/testthat/edition: 3
 URL: https://github.com/javenrflo/picR
 BugReports: https://github.com/javenrflo/picR/issues
-VignetteBuilder: knitr
